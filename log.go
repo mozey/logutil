@@ -1,6 +1,8 @@
 package logutil
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -12,12 +14,16 @@ import (
 // Wrap new errors with WithStack
 //		errors.WithStack(fmt.Errorf("foo"))
 //
-// Route handlers should not override the stack,
-// just return the error.
+// Errors returned by build-in or third party packages
+// should be wrapped using `errors.WithStack`.
+// Avoid excessive use of `errors.Wrap`,
+// it's not as useful as a stack trace,
+// and makes the error message harder to read.
 //
-// Errors returned from build-in or third party packages
-// can be wrapped using `errors.Wrap` or `.WithStack`.
-// Try to wrap errors on the boundaries of this project
+// Call `.WithStack` on the boundaries of your project.
+// Then don't call it again internally to the project.
+// The stack trace must take you to the line where
+// your project is interfacing with the vendor code
 //
 func SetupLogger(consoleWriter bool) {
 	// Prod
@@ -37,5 +43,15 @@ func SetupLogger(consoleWriter bool) {
 			TimeFormat:    "2006-01-02 15:04:05",
 			MarshalIndent: true,
 		})
+	}
+}
+
+func PanicHandler() {
+	if r := recover(); r != nil {
+		err := fmt.Errorf("%s", r)
+		// Use zerolog to print stack trace
+		// https://github.com/rs/zerolog/pull/35
+		err = errors.Wrap(err, "recovered panic")
+		log.Error().Stack().Err(err).Msg("")
 	}
 }

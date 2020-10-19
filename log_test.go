@@ -14,3 +14,9 @@ func TestMarshalStack(t *testing.T) {
 	err := errors.WithStack(fmt.Errorf("testing"))
 	log.Error().Stack().Err(err).Msg("")
 }
+
+func TestPanicHandler(t *testing.T) {
+	logutil.SetupLogger(true)
+	defer logutil.PanicHandler()
+	panic("testing")
+}
