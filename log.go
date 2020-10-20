@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"io"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -48,13 +49,21 @@ func SetupLogger(consoleWriter bool, w ...io.Writer) {
 	if consoleWriter {
 		// Dev
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+		// Windows cmd.exe doesn't support escape sequences for colors
+		noColor := false
+		if runtime.GOOS == "windows" {
+			noColor = true
+		}
+
 		writer := ConsoleWriter{
 			Out:           os.Stdout,
-			NoColor:       false,
+			NoColor:       noColor,
 			TimeFormat:    "2006-01-02 15:04:05",
 			MarshalIndent: true,
 		}
 		writers = append(writers, writer)
+
 	} else {
 		// Prod
 		writer := log.With().Caller().Logger()
