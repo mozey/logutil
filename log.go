@@ -16,6 +16,11 @@ func SetDefaults() {
 	zerolog.TimeFieldFormat = time.RFC3339
 	zerolog.TimestampFieldName = "created"
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
+	// WARNING Avoid using log.Panic().Err(err).Msg(""),
+	// if ErrorFieldName is set to "message" this will override
+	// err.Error() with an empty string.
+	// Rather use log.Error().Stack().Err(err).Msg("")
 	zerolog.ErrorFieldName = "message"
 	zerolog.ErrorStackMarshaler = MarshalStack
 }
@@ -36,7 +41,7 @@ func SetDefaults() {
 // The stack trace must take you to the line where
 // your project is interfacing with the vendor code
 //
-// Additional writer may be specified, for example to log to a file
+// Additional writers may be specified, for example to log to a file
 //	f, err := os.OpenFile(pathToFile, os.O_WRONLY|os.O_CREATE, 0644)
 //	logutil.SetupLogger(true, f)
 // See https://github.com/rs/zerolog#multiple-log-output
