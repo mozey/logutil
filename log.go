@@ -2,13 +2,14 @@ package logutil
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"io"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // SetDefaults as recommended by this package
@@ -44,12 +45,13 @@ func SetDefaults() {
 // Additional writers may be specified, for example to log to a file
 //	f, err := os.OpenFile(pathToFile, os.O_WRONLY|os.O_CREATE, 0644)
 //	logutil.SetupLogger(true, f)
+//
 // See https://github.com/rs/zerolog#multiple-log-output
 //
 func SetupLogger(consoleWriter bool, w ...io.Writer) {
 	SetDefaults()
 
-	writers := make([]io.Writer, 0, len(w)+1)
+	writers := make([]io.Writer, 0)
 
 	if consoleWriter {
 		// Dev
@@ -71,8 +73,7 @@ func SetupLogger(consoleWriter bool, w ...io.Writer) {
 
 	} else {
 		// Prod
-		writer := log.With().Caller().Logger()
-		writers = append(writers, writer)
+		writers = append(writers, os.Stdout)
 	}
 
 	// Log to additional writers, e.g. file

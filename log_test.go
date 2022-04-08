@@ -2,14 +2,15 @@ package logutil_test
 
 import (
 	"fmt"
-	"github.com/mozey/logutil"
-	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/mozey/logutil"
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMarshalStack(t *testing.T) {
@@ -24,6 +25,14 @@ func TestPanicHandler(t *testing.T) {
 	logutil.SetupLogger(true)
 	defer logutil.PanicHandler()
 	panic("testing")
+}
+
+func TestConsoleWriteFalse(t *testing.T) {
+	// TODO Capture os.Stdout and verify log output
+	logutil.SetupLogger(false)
+	err := errors.WithStack(fmt.Errorf("testing"))
+	log.Error().Stack().Err(err).Msg("")
+	// Must not double encode log JSON inside message property
 }
 
 func TestSetupLogger(t *testing.T) {
