@@ -26,6 +26,27 @@ func SetDefaults() {
 	zerolog.ErrorStackMarshaler = MarshalStack
 }
 
+// DefaultConsoleWriter creates a new ConsoleWriter with default settings.
+// Write JSON logs to stdout like this
+//	NewConsoleWriter(os.Stdout)
+// Or to write human readable logs to a file
+//	f, err := os.OpenFile(pathToFile, os.O_WRONLY|os.O_CREATE, 0644)
+//	NewConsoleWriter(f)
+func DefaultConsoleWriter(output io.Writer) (writer io.Writer) {
+	// Windows cmd.exe doesn't support escape sequences for colors
+	noColor := false
+	if runtime.GOOS == "windows" {
+		noColor = true
+	}
+
+	return ConsoleWriter{
+		Out:           output,
+		NoColor:       noColor,
+		TimeFormat:    "2006-01-02 15:04:05",
+		MarshalIndent: true,
+	}
+}
+
 // SetupLogger sets up logging using zerolog.
 //
 // Wrap new errors with WithStack
@@ -56,19 +77,7 @@ func SetupLogger(consoleWriter bool, w ...io.Writer) {
 	if consoleWriter {
 		// Dev
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
-		// Windows cmd.exe doesn't support escape sequences for colors
-		noColor := false
-		if runtime.GOOS == "windows" {
-			noColor = true
-		}
-
-		writer := ConsoleWriter{
-			Out:           os.Stdout,
-			NoColor:       noColor,
-			TimeFormat:    "2006-01-02 15:04:05",
-			MarshalIndent: true,
-		}
+		writer := DefaultConsoleWriter(os.Stdout)
 		writers = append(writers, writer)
 
 	} else {
@@ -76,7 +85,7 @@ func SetupLogger(consoleWriter bool, w ...io.Writer) {
 		writers = append(writers, os.Stdout)
 	}
 
-	// Log to additional writers, e.g. file
+	// Log JSON to additional writers, e.g. file
 	if len(w) > 0 {
 		writers = append(writers, w...)
 	}
