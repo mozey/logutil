@@ -28,8 +28,11 @@ func SetDefaults() {
 
 // DefaultConsoleWriter creates a new ConsoleWriter with default settings.
 // Write JSON logs to stdout like this
+//
 //	NewConsoleWriter(os.Stdout)
+//
 // Or to write human readable logs to a file
+//
 //	f, err := os.OpenFile(pathToFile, os.O_WRONLY|os.O_CREATE, 0644)
 //	NewConsoleWriter(f)
 func DefaultConsoleWriter(output io.Writer) (writer io.Writer) {
@@ -50,7 +53,8 @@ func DefaultConsoleWriter(output io.Writer) (writer io.Writer) {
 // SetupLogger sets up logging using zerolog.
 //
 // Wrap new errors with WithStack
-//		errors.WithStack(fmt.Errorf("foo"))
+//
+//	errors.WithStack(fmt.Errorf("foo"))
 //
 // Errors returned by build-in or third party packages
 // should be wrapped using `errors.WithStack`.
@@ -64,24 +68,24 @@ func DefaultConsoleWriter(output io.Writer) (writer io.Writer) {
 // your project is interfacing with the vendor code
 //
 // Additional writers may be specified, for example to log to a file
+//
 //	f, err := os.OpenFile(pathToFile, os.O_WRONLY|os.O_CREATE, 0644)
 //	logutil.SetupLogger(true, f)
 //
 // See https://github.com/rs/zerolog#multiple-log-output
-//
 func SetupLogger(consoleWriter bool, w ...io.Writer) {
 	SetDefaults()
 
 	writers := make([]io.Writer, 0)
 
 	if consoleWriter {
-		// Dev
+		// Human readable
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		writer := DefaultConsoleWriter(os.Stdout)
 		writers = append(writers, writer)
 
 	} else {
-		// Prod
+		// JSON
 		writers = append(writers, os.Stdout)
 	}
 
