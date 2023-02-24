@@ -52,12 +52,16 @@ func DefaultConsoleWriter(output io.Writer) (writer io.Writer) {
 
 // SetupLogger sets up logging using zerolog.
 //
-// Wrap new errors with WithStack
+// Create new errors with stack
 //
-//	errors.WithStack(fmt.Errorf("foo"))
+//	errors.Errorf("your error message")
+//
+// Or add stack to existing errors
+//
+//	errors.WithStack(err)
 //
 // Errors returned by build-in or third party packages
-// should be wrapped using `errors.WithStack`.
+// must be wrapped using `errors.WithStack`.
 // Avoid excessive use of `errors.Wrap`,
 // it's not as useful as a stack trace,
 // and makes the error message harder to read.
