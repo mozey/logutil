@@ -27,7 +27,7 @@ When logging to json a stack trace will also be included
 
 ## Multiple writers
 
-Setup additional writers like as below, see examples in `log_test.go`
+Setup additional writers like this, see examples in `log_test.go`
 ```go
 logutil.SetupLogger(true, w1, w2)
 ```
