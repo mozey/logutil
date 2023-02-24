@@ -17,7 +17,13 @@ import (
 
 func TestMarshalStack(t *testing.T) {
 	logutil.SetupLogger(true)
-	err := errors.WithStack(fmt.Errorf("testing"))
+	// Creating errors this way includes a stack trace
+	err := errors.Errorf("testing")
+	log.Error().Stack().Err(err).Msg("")
+
+	// Existing err can be wrapped to include a stack trace
+	err = fmt.Errorf("testing 2")
+	err = errors.WithStack(err)
 	log.Error().Stack().Err(err).Msg("")
 }
 
@@ -29,7 +35,7 @@ func TestPanicHandler(t *testing.T) {
 
 func TestConsoleWriteFalse(t *testing.T) {
 	logutil.SetupLogger(false)
-	err := errors.WithStack(fmt.Errorf("testing"))
+	err := errors.Errorf("testing")
 	log.Error().Stack().Err(err).Msg("")
 	// Must not double encode log JSON inside message property
 }
@@ -44,13 +50,13 @@ func TestSetupLogger(t *testing.T) {
 	})()
 
 	filePath := filepath.Join(tmp, "test.log")
-	f, err := os.OpenFile(filePath,
-		os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	require.NoError(t, err)
 	logutil.SetupLogger(true, f)
 
 	// Logs will be written to
 	// stdOut using ConsoleWriter...
-	err = errors.WithStack(fmt.Errorf("testing error"))
+	err = errors.Errorf("testing error")
 	log.Error().Stack().Err(err).Msg("")
 	log.Info().Str("foo", "bar").Float64("pi", 3.14).Msg("testing info")
 
@@ -69,12 +75,12 @@ func TestLogToFile(t *testing.T) {
 	})()
 
 	filePath := filepath.Join(tmp, "test.log")
-	f, err := os.OpenFile(filePath,
-		os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	require.NoError(t, err)
 	logutil.LogToFile(f)
 
 	// Logs will be written to file as JSON
-	err = errors.WithStack(fmt.Errorf("testing error"))
+	err = errors.Errorf("testing error")
 	log.Error().Stack().Err(err).Msg("")
 	log.Info().Str("foo", "bar").Float64("pi", 3.14).Msg("testing info")
 
@@ -92,13 +98,13 @@ func TestConsoleWriterToFile(t *testing.T) {
 	})()
 
 	filePath := filepath.Join(tmp, "test.log")
-	f, err := os.OpenFile(filePath,
-		os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0644)
+	require.NoError(t, err)
 	writer := logutil.DefaultConsoleWriter(f)
 	logutil.SetupLogger(true, writer)
 
 	// Console writer logs will be written to file
-	err = errors.WithStack(fmt.Errorf("testing error"))
+	err = errors.Errorf("testing error")
 	log.Error().Stack().Err(err).Msg("")
 	log.Info().Str("foo", "bar").Float64("pi", 3.14).Msg("testing info")
 

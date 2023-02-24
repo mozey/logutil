@@ -19,7 +19,7 @@ log.Error().Stack().Err(err).Msg("")
 
 Add stack trace to an existing error
 ```go
-err := errors.WithStack("testing")
+err := errors.WithStack(err)
 ```
 
 When logging to json a stack trace will also be included    
