@@ -12,6 +12,22 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var noColor bool
+
+func init() {
+	// Windows cmd.exe doesn't support escape sequences for colors
+	noColor = false
+	if runtime.GOOS == "windows" {
+		noColor = true
+	}
+}
+
+// SetNoColor overrides the default set in the init func.
+// To use the override, this func must be called before SetupLogger
+func SetNoColor(override bool) {
+	noColor = override
+}
+
 // SetDefaults as recommended by this package
 func SetDefaults() {
 	zerolog.TimeFieldFormat = time.RFC3339
@@ -36,12 +52,6 @@ func SetDefaults() {
 //	f, err := os.OpenFile(pathToFile, os.O_WRONLY|os.O_CREATE, 0644)
 //	NewConsoleWriter(f)
 func DefaultConsoleWriter(output io.Writer) (writer io.Writer) {
-	// Windows cmd.exe doesn't support escape sequences for colors
-	noColor := false
-	if runtime.GOOS == "windows" {
-		noColor = true
-	}
-
 	return ConsoleWriter{
 		Out:           output,
 		NoColor:       noColor,

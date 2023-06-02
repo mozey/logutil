@@ -2,7 +2,6 @@ package logutil_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -33,17 +32,15 @@ func TestPanicHandler(t *testing.T) {
 	panic("testing")
 }
 
-func TestConsoleWriteFalse(t *testing.T) {
+func TestConsoleWriterFalse(t *testing.T) {
 	logutil.SetupLogger(false)
 	err := errors.Errorf("testing")
 	log.Error().Stack().Err(err).Msg("")
 	// Must not double encode log JSON inside message property
 }
 
-// TODO Verify logs written to file
-
 func TestSetupLogger(t *testing.T) {
-	tmp, err := ioutil.TempDir("", "mozey-logutil")
+	tmp, err := os.MkdirTemp("", "mozey-logutil")
 	require.NoError(t, err)
 	defer (func() {
 		_ = os.RemoveAll(tmp)
@@ -61,14 +58,14 @@ func TestSetupLogger(t *testing.T) {
 	log.Info().Str("foo", "bar").Float64("pi", 3.14).Msg("testing info")
 
 	// ...and to file as JSON
-	b, err := ioutil.ReadFile(filePath)
+	b, err := os.ReadFile(filePath)
 	require.NoError(t, err)
 
 	fmt.Println("\n--- File content\n", string(b))
 }
 
 func TestLogToFile(t *testing.T) {
-	tmp, err := ioutil.TempDir("", "mozey-logutil")
+	tmp, err := os.MkdirTemp("", "mozey-logutil")
 	require.NoError(t, err)
 	defer (func() {
 		_ = os.RemoveAll(tmp)
@@ -84,14 +81,14 @@ func TestLogToFile(t *testing.T) {
 	log.Error().Stack().Err(err).Msg("")
 	log.Info().Str("foo", "bar").Float64("pi", 3.14).Msg("testing info")
 
-	b, err := ioutil.ReadFile(filePath)
+	b, err := os.ReadFile(filePath)
 	require.NoError(t, err)
 
 	fmt.Println("\n--- File content\n", string(b))
 }
 
 func TestConsoleWriterToFile(t *testing.T) {
-	tmp, err := ioutil.TempDir("", "mozey-logutil")
+	tmp, err := os.MkdirTemp("", "mozey-logutil")
 	require.NoError(t, err)
 	defer (func() {
 		_ = os.RemoveAll(tmp)
@@ -108,8 +105,23 @@ func TestConsoleWriterToFile(t *testing.T) {
 	log.Error().Stack().Err(err).Msg("")
 	log.Info().Str("foo", "bar").Float64("pi", 3.14).Msg("testing info")
 
-	b, err := ioutil.ReadFile(filePath)
+	b, err := os.ReadFile(filePath)
 	require.NoError(t, err)
 
 	fmt.Println("\n--- File content\n", string(b))
+}
+
+func TestConsoleWriterNoColor(t *testing.T) {
+	// Default is to use colors, unless runtime.GOOS == "windows".
+	logutil.SetupLogger(true)
+	// This log will have color codes
+	err := errors.Errorf("testing")
+	log.Error().Stack().Err(err).Msg("")
+
+	// Override by calling SetNoColor.
+	// Useful when ConsoleWriter is used to write logs to a file
+	logutil.SetNoColor(true)
+	logutil.SetupLogger(true)
+	// This log won't have color codes
+	log.Error().Stack().Err(err).Msg("")
 }
